@@ -1,0 +1,17 @@
+{
+  "usuarios": [
+    {
+      "usuario": "admin",
+      "contraseña": "12345678"
+    },
+    {
+      "usuario": "usuario1",
+      "contraseña": "contraseña1"
+    },
+    {
+      "usuario": "tirapete",
+      "contraseña": "amoelpene"
+    }
+
+  ]
+}
