@@ -39,6 +39,15 @@
     }
   </style>
 </head>
+  <script>
+  // Comprobación de autenticación de usuario antes de cargar el contenido
+  const isAuthenticated = sessionStorage.getItem('isAuthenticated');
+
+  if (!isAuthenticated) {
+    // Si no está autenticado, redirige al login en la raíz
+    window.location.replace('../index.html');
+  }
+</script>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
 
   <!-- ==================== BARRA DE NAVEGACIÓN ==================== -->
