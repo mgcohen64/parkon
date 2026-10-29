@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParkOn BA - Cocheras por Barrio</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .fade-in {
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- ==================== BARRA SUPERIOR (NAVBAR) ==================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/95">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo ParkOn BA -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100 flex-shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-slate-900">
+            Park<span class="text-emerald-500">On</span>
+            <span class="text-xs uppercase bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded ml-1">BA</span>
+          </span>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Estacionar inteligente para moverse mejor</p>
+        </div>
+      </div>
+
+      <!-- Usuario y Botón Cerrar Sesión -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <div class="flex items-center text-xs sm:text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+          Hola, <span id="userBadge" class="ml-1 font-semibold text-slate-800">Usuario</span>
+        </div>
+
+        <button 
+          id="btnLogout"
+          onclick="handleLogout()"
+          class="inline-flex items-center text-xs sm:text-sm font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-rose-200 transition"
+          title="Cerrar sesión">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Salir
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+  <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <!-- Encabezado simple -->
+    <div class="text-center max-w-2xl mx-auto mb-8">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        Estacionamientos en Buenos Aires
+      </h1>
+      <p class="mt-2 text-sm sm:text-base text-slate-600">
+        Elegí el barrio donde necesitás estacionar para consultar cocheras y tarifas en tiempo real.
+      </p>
+    </div>
+
+    <!-- Selector único de barrio -->
+    <div class="max-w-xl mx-auto mb-10">
+      <label for="barrioSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 text-center">
+        Seleccioná un barrio de CABA
+      </label>
+      <div class="relative">
+        <select 
+          id="barrioSelect" 
+          onchange="onBarrioChange()"
+          class="w-full bg-white border-2 border-indigo-200 hover:border-indigo-400 text-slate-800 rounded-xl px-4 py-3.5 pl-11 appearance-none font-semibold text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition cursor-pointer">
+          <option value="">-- Seleccioná un barrio... --</option>
+        </select>
+
+        <!-- Icono pin decorativo -->
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-500">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+
+        <!-- Flecha dropdown -->
+        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de estado y cantidad -->
+    <div id="resultsHeader" class="hidden items-center justify-between mb-4 border-b border-slate-200 pb-3">
+      <p class="text-sm font-semibold text-slate-700">
+        Cocheras encontradas en <span id="selectedBarrioLabel" class="text-indigo-600 font-bold"></span>:
+        <span id="resultsCount" class="text-slate-900 font-bold ml-1">0</span>
+      </p>
+      <span class="text-xs text-slate-400">Tarifas por hora en ARS</span>
+    </div>
+
+    <!-- ==================== ESTADO INICIAL (VACÍO) ==================== -->
+    <div id="initialState" class="text-center py-16 px-4 bg-white border border-dashed border-slate-300 rounded-2xl max-w-lg mx-auto">
+      <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-800 mb-1">Ningún barrio seleccionado</h3>
+      <p class="text-xs sm:text-sm text-slate-500">
+        Elegí un barrio en el menú desplegable superior para ver los estacionamientos disponibles.
+      </p>
+    </div>
+
+    <!-- ==================== LISTADO DE TARJETAS ==================== -->
+    <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 hidden">
+      <!-- Inyectado dinámicamente con JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- ==================== MODAL DE CONFIRMACIÓN ==================== -->
+  <div id="reservationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden px-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative text-center">
+      <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+
+      <h3 class="text-lg font-bold text-slate-900 mb-1">¡Lugar Reservado!</h3>
+      <p class="text-xs text-slate-500 mb-4">Te guardamos la cochera por 15 minutos sin cargo.</p>
+
+      <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 mb-5 text-left text-xs space-y-1.5">
+        <div><span class="text-slate-400">Cochera:</span> <strong id="modalName" class="text-slate-800"></strong></div>
+        <div><span class="text-slate-400">Dirección:</span> <span id="modalAddress" class="text-slate-700 font-medium"></span></div>
+        <div><span class="text-slate-400">Tarifa / hora:</span> <span id="modalPrice" class="text-indigo-600 font-bold"></span></div>
+      </div>
+
+      <button 
+        onclick="closeModal()" 
+        class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white border-t border-slate-200 py-5 text-center text-xs text-slate-400 mt-12">
+    ParkOn BA — Sistema de Gestión y Búsqueda de Estacionamientos • CABA
+  </footer>
+
+  <!-- ==================== LÓGICA JAVASCRIPT ==================== -->
+  <script>
+    // Los 48 barrios oficiales de la Ciudad Autónoma de Buenos Aires
+    const BARRIOS_CABA = [
+      "Agronomía", "Almagro", "Balvanera", "Barracas", "Belgrano", "Boedo",
+      "Caballito", "Chacarita", "Coghlan", "Colegiales", "Constitución", "Flores",
+      "Floresta", "La Boca", "La Paternal", "Liniers", "Mataderos", "Monte Castro",
+      "Montserrat", "Nueva Pompeya", "Núñez", "Palermo", "Parque Avellaneda",
+      "Parque Chacabuco", "Parque Chas", "Parque Patricios", "Puerto Madero",
+      "Recoleta", "Retiro", "Saavedra", "San Cristóbal", "San Nicolás", "San Telmo",
+      "Vélez Sársfield", "Versalles", "Villa Crespo", "Villa del Parque", "Villa Devoto",
+      "Villa General Mitre", "Villa Lugano", "Villa Luro", "Villa Ortúzar",
+      "Villa Pueyrredón", "Villa Real", "Villa Riachuelo", "Villa Santa Rita",
+      "Villa Soldati", "Villa Urquiza"
+    ];
+
+    // Calles verídicas típicas según barrio para dar mayor realismo
+    const CALLES_POR_BARRIO = {
+      "Palermo": ["Av. Santa Fe", "Gorriti", "Honduras", "Av. Scalabrini Ortiz", "Thames"],
+      "Recoleta": ["Av. Callao", "Vicente López", "Junín", "Av. Alvear", "Pacheco de Melo"],
+      "Belgrano": ["Av. Cabildo", "Juramento", "Vuelta de Obligado", "Echeverría", "Monroe"],
+      "Caballito": ["Av. Rivadavia", "Rosario", "Av. Acoyte", "Guayaquil", "Rojas"],
+      "San Telmo": ["Defensa", "Bolívar", "Av. San Juan", "Perú", "Balcarce"],
+      "Almagro": ["Av. Medrano", "Av. Corrientes", "Billinghurst", "Gascón", "Av. Díaz Vélez"],
+      "Balvanera": ["Av. Pueyrredón", "Pasteur", "Av. Corrientes", "Junín", "Bartolomé Mitre"],
+      "Puerto Madero": ["Juana Manso", "Aimé Painé", "Pierina Dealessi", "Olga Cossettini", "Marta Lynch"],
+      "Villa Urquiza": ["Av. Triunvirato", "Av. Monroe", "Bauness", "Av. Olazábal", "Cullen"],
+      "Villa Crespo": ["Gurruchaga", "Av. Corrientes", "Malabia", "Loyola", "Vera"]
+    };
+
+    const CALLES_GENERICAS = ["Av. San Martín", "Av. Rivadavia", "Av. Corrientes", "Av. Belgrano", "Av. Independencia", "Av. Córdoba"];
+
+    // Nombres base de cocheras
+    const NOMBRES_COCHERAS = [
+      "Estacionamiento Central", "Garage Park", "Cocheras del Sol", "AutoPark 24hs", 
+      "Garage San Cayetano", "Parking Express", "Cocheras del Centro", "Plaza Garage"
+    ];
+
+    // Cache de estacionamientos por barrio para que no cambien al volver a seleccionar
+    const databaseCache = {};
+
+    /**
+     * Genera cocheras para el barrio seleccionado
+     */
+    function getParkingsForBarrio(barrio) {
+      if (databaseCache[barrio]) {
+        return databaseCache[barrio];
+      }
+
+      const calles = CALLES_POR_BARRIO[barrio] || CALLES_GENERICAS;
+      const count = 3 + (barrio.length % 3); // De 3 a 5 cocheras por barrio
+      const parkings = [];
+
+      for (let i = 0; i < count; i++) {
+        const calle = calles[i % calles.length];
+        const altura = 400 + ((i + 1) * 320);
+        const cupos = (i === 1) ? 0 : Math.floor(Math.random() * 15) + 1; // Algunos agotados
+        const tarifa = 2000 + (Math.floor(Math.random() * 8) * 200);
+
+        parkings.push({
+          id: `${barrio}-${i}`,
+          nombre: `${NOMBRES_COCHERAS[i % NOMBRES_COCHERAS.length]} ${barrio}`,
+          direccion: `${calle} ${altura}`,
+          barrio: barrio,
+          cupos: cupos,
+          tarifa: tarifa,
+          servicios: i % 2 === 0 ? ["24 Horas", "Cubierto"] : ["Cubierto", "Seguridad"]
+        });
+      }
+
+      databaseCache[barrio] = parkings;
+      return parkings;
+    }
+
+    // Inicializar al cargar la página
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Mostrar nombre de usuario desde sessionStorage
+      const user = sessionStorage.getItem("loggedUser");
+      if (user) {
+        document.getElementById("userBadge").textContent = user;
+      }
+
+      // 2. Poblar el select con los 48 barrios
+      const select = document.getElementById("barrioSelect");
+      BARRIOS_CABA.sort().forEach(barrio => {
+        const option = document.createElement("option");
+        option.value = barrio;
+        option.textContent = barrio;
+        select.appendChild(option);
+      });
+    });
+
+    /**
+     * Reacciona al cambio del <select> de barrio
+     */
+    function onBarrioChange() {
+      const select = document.getElementById("barrioSelect");
+      const barrio = select.value;
+
+      const initialState = document.getElementById("initialState");
+      const resultsHeader = document.getElementById("resultsHeader");
+      const resultsGrid = document.getElementById("resultsGrid");
+      const selectedBarrioLabel = document.getElementById("selectedBarrioLabel");
+      const resultsCount = document.getElementById("resultsCount");
+
+      // Si no hay barrio seleccionado, volvemos al estado inicial
+      if (!barrio) {
+        initialState.classList.remove("hidden");
+        resultsHeader.classList.add("hidden");
+        resultsHeader.classList.remove("flex");
+        resultsGrid.classList.add("hidden");
+        resultsGrid.innerHTML = "";
+        return;
+      }
+
+      // Ocultar estado inicial y mostrar encabezado de resultados
+      initialState.classList.add("hidden");
+      resultsHeader.classList.remove("hidden");
+      resultsHeader.classList.add("flex");
+      resultsGrid.classList.remove("hidden");
+
+      selectedBarrioLabel.textContent = barrio;
+      const parkings = getParkingsForBarrio(barrio);
+      resultsCount.textContent = parkings.length;
+
+      // Renderizar tarjetas
+      resultsGrid.innerHTML = "";
+      parkings.forEach(p => {
+        // Badge de disponibilidad
+        let badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-300";
+        let badgeText = `${p.cupos} lugares`;
+
+        if (p.cupos === 0) {
+          badgeColor = "bg-rose-100 text-rose-800 border-rose-300";
+          badgeText = "Agotado";
+        } else if (p.cupos <= 3) {
+          badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
+          badgeText = `Últimos ${p.cupos}`;
+        }
+
+        const card = document.createElement("div");
+        card.className = "fade-in bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between";
+
+        card.innerHTML = `
+          <div>
+            <!-- Encabezado de la tarjeta -->
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <h2 class="text-base font-bold text-slate-900 leading-snug">${p.nombre}</h2>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full border ${badgeColor} whitespace-nowrap">
+                ${badgeText}
+              </span>
+            </div>
+
+            <!-- Dirección -->
+            <p class="text-xs text-slate-500 flex items-center mb-4">
+              <svg class="w-3.5 h-3.5 text-indigo-500 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              ${p.direccion}, ${p.barrio}
+            </p>
+
+            <!-- Badges de servicios -->
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              ${p.servicios.map(s => `<span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${s}</span>`).join('')}
+            </div>
+          </div>
+
+          <!-- Pie: Tarifa y Botón de reserva -->
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Tarifa</span>
+              <span class="text-lg font-extrabold text-slate-900">$${p.tarifa.toLocaleString('es-AR')}</span>
+              <span class="text-[11px] text-slate-500">/h</span>
+            </div>
+
+            <button 
+              onclick="openModal('${p.nombre.replace(/'/g, "\\'")}', '${p.direccion.replace(/'/g, "\\'")}', ${p.tarifa})"
+              ${p.cupos === 0 ? 'disabled' : ''}
+              class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition ${
+                p.cupos === 0
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm active:scale-95'
+              }">
+              ${p.cupos === 0 ? 'Sin cupo' : 'Reservar'}
+            </button>
+          </div>
+        `;
+
+        resultsGrid.appendChild(card);
+      });
+    }
+
+    /**
+     * Modal interactivo de reserva
+     */
+    function openModal(nombre, direccion, tarifa) {
+      document.getElementById("modalName").textContent = nombre;
+      document.getElementById("modalAddress").textContent = direccion + ", CABA";
+      document.getElementById("modalPrice").textContent = `$${tarifa.toLocaleString('es-AR')}`;
+      document.getElementById("reservationModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("reservationModal").classList.add("hidden");
+    }
+
+    /**
+     * Cerrar sesión y volver al login en la raíz
+     */
+    function handleLogout() {
+      sessionStorage.removeItem("loggedUser");
+      window.location.href = "../index.html";
+    }
+  </script>
+</body>
+</html>
