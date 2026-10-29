@@ -73,8 +73,9 @@
           );
 
           if (user) {
-            alertBox.textContent = 'Inicio de sesión exitoso';
-            alertBox.classList.add('alert-success');
+            sessionStorage.setItem('isAuthenticated', 'true');
+            sessionStorage.setItem('loggedUser', user.usuario);
+
             window.location.href = 'pages/estacionamientos2.html';
           } else {
             alertBox.textContent = 'Usuario o contraseña incorrectos';
